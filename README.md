@@ -147,6 +147,109 @@ Larger basis set can be generated based on defined-above smaller basis set. For 
 
 Please note, you should always make sure that the maximal angular momentum requested in this section is not larger than the `lmaxmax` defined in the reference geometries section.
 
+## Advanced orbital options
+
+The `orbitals` entries shown above only carry the compulsory keys `nzeta`, `geoms`, `nbands` and `checkpoint`. Besides these, every orbital entry additionally supports the following optional keys to fine-tune how it is initialized and grown. All of them are pure keywords of the current ORBGEN v3.0 input script.
+
+### Initialization models: `model` and `model_kwargs`
+
+During the spillage optimization, each orbital starts from an initial guess of the primitive contraction coefficients. This is controlled by the initialization **model**. The top-level `spill_guess` key only sets the *global default*; each orbital entry can override it with its own `model`, together with a per-model `model_kwargs` dict:
+
+```json
+{
+    "spill_guess": "atomic",
+    "orbitals": [
+        {
+            "nzeta": [1, 1, 0],
+            "geoms": [0],
+            "nbands": "occ",
+            "checkpoint": null
+        },
+        {
+            "nzeta": [2, 2, 1],
+            "geoms": [0],
+            "nbands": "occ",
+            "checkpoint": 0,
+            "model": "hydrogen",
+            "model_kwargs": {"slater": true}
+        }
+    ]
+}
+```
+
+In the example above, the second orbital would be initialized with screened hydrogen-like orbitals instead of the global `atomic` model. `model_kwargs` are automatically filtered to only the keys that are meaningful for the chosen `model`, so it is safe to reuse one dict across orbitals with different models.
+
+The supported models are:
+
+| model | purpose | valid `model_kwargs` keys |
+|------|---------|--------------------------|
+| `ones` | identity/unit initial guess, fastest but often poor | none |
+| `random` | random coefficients (PRB 103, 235131 (2021)) | `seed` |
+| `atomic` | from a single-atom (monomer) DFT calculation | `jobdir` (required), `vloc_aux`, `lloc_min` |
+| `hydrogen` | hydrogen-like orbitals, with or without Slater screening | `slater`, `otherelem` |
+| `pretrained` | restart/hot-start from an existing `.orb` file | `pretrained` |
+
+Notes on the individual models:
+
+- `atomic` requires a `jobdir` pointing to the monomer calculation. Empirically, the pure atomic calculation cannot give satisfying starting points for high angular momentum orbitals (e.g. g orbitals). To improve this, provide `vloc_aux` (a file describing an auxiliary local potential) and `lloc_min`, beyond which angular momentum the coefficients are initialized by solving the radial Schrödinger equation under that auxiliary potential. `lloc_min` defaults to `4`. Unless you override `model` per orbital, `atomic` is the value coming from the top-level `spill_guess`.
+- `hydrogen` with `otherelem` set to another element of higher Z is useful to avoid the truncation of the generated hydrogen-like radial functions at the cutoff radius.
+- `pretrained` with `pretrained` pointing to an `.orb` file lets you continue from a previously generated orbital.
+
+### Automatic basis growth: `greedygrow` and `nzeta_max`
+
+Instead of manually writing one contraction entry per sought-after basis size, you can ask the code to **grow a basis set automatically** until the spillage stops decreasing. Set `"greedygrow": true` on an orbital and give an upper bound `nzeta_max`:
+
+```json
+{
+    "orbitals": [
+        {
+            "nzeta": [1, 1, 0],
+            "geoms": [0],
+            "nbands": "occ",
+            "checkpoint": null,
+            "greedygrow": true,
+            "nzeta_max": [3, 3, 3]
+        }
+    ]
+}
+```
+
+The greedy algorithm starts from the `nzeta` given, and at each step tries adding one more zeta function for each angular momentum, keeps the one that most reduces the spillage per `(2l+1)` basis functions (accounting for the computational cost), and repeats until no angular momentum can lower the spillage (or `nzeta_max` is reached). This is the recommended way to turn "generate a basis set" into an automated, convergence-driven process. Note that `nzeta_max` must be element-wise greater than or equal to `nzeta`.
+
+### Other per-orbital options
+
+- `filename`: customize the name of the output `.orb` file for this orbital.
+- `fix_components`: a nested list that freezes (keeps constant during optimization) the given contraction coefficients; useful for constrained basis sets.
+
+### Automatic zeta counts: `nzeta` as a string
+
+Besides a list of integers, `nzeta` of an orbital can be a string of the form
+
+```
+auto:(twsvd|amwsvd):<threshold>[:(max|mean)]
+```
+
+e.g. `"nzeta": "auto:twsvd:0.8:max"`. The code then infers the number of zeta functions for each angular momentum from the reference data using the `twsvd` or `amwsvd` method, keeping only those below the given singular-value threshold. The trailing `:max|:mean` selects how the statistics are combined, defaulting to `max`.
+
+## Compute and environment options
+
+The following top-level keys control how the underlying ABACUS DFT calculations are launched:
+
+```json
+{
+    "environment": "",
+    "mpi_command": "mpirun -np 8",
+    "abacus_command": "abacus",
+    "nthreads_rcut": 4,
+    "max_steps": 9000
+}
+```
+
+- `environment` / `mpi_command` / `abacus_command` describe how to invoke ABACUS (module loading, the MPI launcher and its process count, and the executable). If `abacus_command` is `null`/missing, ABACUS is not run and only the jy/orbital preparation is performed.
+- `nthreads_rcut` is the number of threads used for the spillage optimization.
+- `max_steps` caps the number of optimization steps per contraction.
+- Optimizer-specific keys prefixed with `torch.` or `scipy.` (e.g. `optimizer`, `torch.lr`) are forwarded to the chosen optimizer.
+
 ## Systematic way to determine the truncation radius and the maximal angular momentum
 
 The truncation radius and the maximal angular momentum are two important parameters that control the completeness of the basis set. We suggest a systematic way to determine these two parameters by varying them and checking the convergence behavior of the relative total energy error of a test system calculated with the primitive basis set with respect to the reference plane wave calculation. 
