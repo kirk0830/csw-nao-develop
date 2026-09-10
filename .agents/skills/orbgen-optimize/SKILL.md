@@ -18,11 +18,30 @@ Composes and runs the `orbitals` block, then executes `orbgen`. This is where th
 }
 ```
 
-- First contraction has `checkpoint: null`. Later ones set `checkpoint` to the index of the smaller basis they build on.
+- **Always** start from the **minimal basis** (`checkpoint: null`), then each later contraction sets `checkpoint` to the index of the smaller basis it grows from.
 - `nzeta`: number of zeta per angular momentum.
 - `geoms`: **a list of int**, indices into the `geoms` block — each `geoms` entry (a single dict) is one reference structure/perturbation, and this int says which ones this orbital draws its reference DFT wavefunctions from. Pass `[0]` for one geometry or `[0, 1]` for several (not a bare int).
 - `nbands`: `occ`, `all`, or an int ≤ the geom's `nbands`.
 - The max l in any `nzeta` must be ≤ the geom's `lmaxmax`.
+
+### The checkpointing *technique* (experience)
+
+Spillage optimization is a hard, large problem, so in practice it is done in **small steps via the checkpoint cascade**, not by optimizing everything at once. If you optimize too many orbitals in one shot, the result is often bad.
+
+**Recommended ladder (adds one bit of complexity per step):**
+
+```
+minimal (SZ)  →  DZ  →  DZP  →  TZP  →  TZDP (≈pVTZ)
+```
+
+That is, don't jump straight from SZ to TZDP; go through DZ and DZP and TZP. (Alternate common target rungs: minimal → pVDZ/DZP → TZDP.) Each `checkpoint: N` freezes the inner shell of the previous, smaller orbital and only optimizes the newly added zeta on top.
+
+**How to tell a bad optimization** (all signals the user should watch for):
+- orbitals with an unphysical long-range tail far from the nucleus, and/or
+- anomalous oscillation / wiggling in the orbital,
+- a **higher than expected Spillage** value on the same reference set.
+
+A clean, well-optimized orbital normally comes with a **lower Spillage** — read it from the `orbgen` stdout/cascade log to compare runs.
 
 ## Initialization: `model` / `model_kwargs`
 
