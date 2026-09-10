@@ -24,6 +24,8 @@ Composes and runs the `orbitals` block, then executes `orbgen`. This is where th
 - `nbands`: `occ`, `all`, or an int ≤ the geom's `nbands`.
 - The max l in any `nzeta` must be ≤ the geom's `lmaxmax`.
 
+**Sizing `nbands` (experience):** the **minimal basis should always use `nbands: occ`**. For larger contractions, scale it up (e.g. `occ*2`) so the spillage has enough virtual/unoccupied information to build a transferable, conduction-band-aware basis. Auto-inference forms (e.g. `twsvd`-based analysis) exist and work by wavefunction analysis rather than fixed counting, but they are advanced/not beginner-friendly — suggest `occ`, `occ*2`, or an explicit int to most users.
+
 ### The checkpointing *technique* (experience)
 
 Spillage optimization is a hard, large problem, so in practice it is done in **small steps via the checkpoint cascade**, not by optimizing everything at once. If you optimize too many orbitals in one shot, the result is often bad.
