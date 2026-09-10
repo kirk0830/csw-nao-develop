@@ -55,14 +55,29 @@ Composes the DFT reference data and the primitive basis settings of the ORBGEN i
 }
 ```
 
-- `proto`: `dimer`, `trimer`, `square`, `tetrahedron`, `octahedron`, `cube`, or a structure file path.
-- `pertkind`: `stretch` only is currently supported.
-- `pertmags`: list of perturbation magnitudes (bond lengths) or the string `auto`.
+### `proto` — pick `dimer`
+`dimer`, `trimer`, `square`, `tetrahedron`, `octahedron`, `cube`, or a structure file path (any custom file whose path is passed). Validated in `SIAB/io/param.py#GeomAssert`.
+
+> **Recommendation: use only `dimer`.** More/bigger protos are meant to improve transferability, but with too few reference samples the added structures produce outliers that pollute the fitted orbital quality. `dimer` is the safe, supported default. (`DEFAULT_BOND_LENGTH` in `SIAB/abacus/io.py` only covers `dimer`/`trimer` anyway.)
+
+### `pertkind` — stretch only
+`pertkind` is the **perturbation type**. Only `stretch` is implemented; `shear`/`twist` are reserved but raise `NotImplementedError` (`SIAB/io/param.py`, `SIAB/abacus/api.py#_build_pert`). Defaults to `stretch` if omitted — you can rely on it.
+
+### `pertmags` — bond lengths, manual list or `auto`
+`pertmags` is the **perturbation magnitude**. For a `dimer` (stretch) that literally means the **bond length(s)**.
+- A **list of int/float**: bond lengths in Bohr (e.g. `[1.75, 2.0, 2.25, 2.75, 3.75]`).
+- **`"auto"`**: expand to a sensible bond-length series. Resolution order (`SIAB/abacus/run.py#_build_abacus`):
+  1. look up the element in `DEFAULT_BOND_LENGTH[proto]` (`SIAB/abacus/io.py`);
+  2. if absent, fall back to a **bond-length scan** (Morse fit plus a 1.5 meV/Å energy filter, `SIAB/abacus/blscan.py`).
+  Bonus: the lookup table already ships curated per-element bond lengths for most elements — prefer `auto` when unsure of the bond length.
+
+### `lmaxmax` & per-geom DFT knobs
+- `lmaxmax` (non-negative int, or dev-string `=N`): max angular momentum of the basis — must be ≥ any orbital's l.
 - `nbands` (positive int): number of states included in the spillage.
 - `nspin`: spin polarization.
-- `lmaxmax`: max angular momentum of the basis — must be ≥ any orbital's l.
+- `celldm` (positive, default `1.0`): lattice constant scale.
 
-Include more structures (e.g. a trimer) for better transferability, but note that a trimer can hurt smoothness; dimer-only is the recommended default.
+When in doubt about bond lengths, just use `"pertmags": "auto"`.
 
 ## Output
 
