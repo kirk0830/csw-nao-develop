@@ -59,6 +59,17 @@ Each orbital's initial guess comes from a model. The top-level `spill_guess` set
 
 Supported models (see README for full notes): `ones`, `random` (needs `seed`), `atomic` (`jobdir` required; optional `vloc_aux`, `lloc_min`), `hydrogen` (`slater`, `otherelem`), `pretrained` (`pretrained` → an existing `.orb`). `model_kwargs` are filtered automatically to the keys valid for the chosen model.
 
+### The `atomic` model and `vloc_aux` for high-l / g orbitals (experience)
+
+`atomic` reads the monomer ABACUS result from `jobdir` and pulls the occupied bands' wavefunctions to build the initial coefficients. By default it can only initialize shells with **\(l <\) `lloc_min`**; components with \(l \ge \text{lloc\_min}\) are **not** initialized this way (`jy_expmt.py#_coef_init`).
+
+For those high-l shells, set `model_kwargs = { "vloc_aux": "<pp.upf>", "lloc_min": 4 }`:
+
+- `vloc_aux` is the path to a pseudopotential whose **`PP_LOCAL`** section is read as the auxiliary local potential.
+- **Why it works:** for SG15-family pseudopotentials, `PP_LOCAL` is (up to the kinetic term) the rest of the Hamiltonian of the **\(l=4\) radial Schrödinger equation**. Adding back the kinetic operator gives the true radial SE, so solving it yields the **all-electron g orbital** directly.
+- **Recommendation:** for the **g orbital** (and any high-\(l\) channel that `atomic` cannot resolve), **always set `vloc_aux` and `lloc_min: 4`.**
+- `vloc_aux` can also be used just as an initializer to produce radial functions of *other* angular momenta — but that carries no special physical meaning; it is "just cooking" (a generic way to generate a starting guess), so it is not the intended use.
+
 ## Automatic growth over zeta: `greedygrow` + `nzeta_max` (experimental)
 
 **Division of labour:** the convergence test (`orbgen-converge-rcutlmax`) fixes `rcut`/`lmax`; `orbgen-converge-ecutjy` fixes `ecutjy`. `greedygrow` acts only on `nzeta` (per-l zeta counts). Prefer specifying `nzeta` explicitly (the checkpoint cascade above); treat `greedygrow` as experimental.
