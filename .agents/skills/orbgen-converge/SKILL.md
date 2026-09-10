@@ -25,6 +25,10 @@ Bigger is *generally* more complete, but there are real failure modes an agent m
 
 Practical stance: prefer fail-fast (`scalapack_gvx`) during exploration/agent runs; keep `genelpa` for clean production systems after `rcut`/`lmax` are settled.
 
+**Tool-specific note:** the repo's own test drivers already encode this trade-off —
+- `tools/JYLmaxRcutJointConvTestDriver.py` runs the NAO/eval stages with **`scalapack_gvx`** → the `rcut`/`lmax` sweep is fail-fast already.
+- `tools/JYEkinConvTestDriver.py` (the `ecutjy` test) still uses **`genelpa`** (and hardcodes `ecutwfc: 100`) → this is where a singular-overlap *hang* is most likely. If that test stalls with no output, suspect singular overlap / try `scalapack_gvx`.
+
 ## Steps
 
 1. **Generate the sweep** with the generator workflow:
