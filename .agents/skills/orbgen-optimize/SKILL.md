@@ -84,6 +84,16 @@ If explicitly requested, `greedygrow: true` adds zeta functions greedily until s
 - `fix_components`: nested list of contraction coefficients to keep frozen.
 - `nzeta` as a string for automatic zeta counts, e.g. `"auto:twsvd:0.8:max"` (methods `twsvd` / `amwsvd`, optional `:max|:mean`).
 
+### Using `fix_components` to preserve nodal structure (experience)
+
+A radial orbital with angular momentum `l` (p, d, f, …) should have **`l` nodes** — the number of times the orbital crosses the axis (p → 1 node, d → 2 nodes, f → 3, …). This is a strong sanity check on the optimized result.
+
+Occasionally the *in-built* initializer (model) yields the **correct node count**, but the optimization afterwards **destroys it**. A common cause is **too few bands** in the `orbitals`/`nbands` settings: with insufficient bands there is not enough distinct information for the orbital to capture, so the optimizer latches onto noise and the node structure is lost.
+
+In that case, **freezing the offending component with `fix_components` gives good results** — the shell keeps its correct nodes and only the remaining coefficients are optimized.
+
+Also note the frozen (fixed) coefficients need not come from the `atomic` model. Sometimes a different initializer is the better frozen reference — e.g. the **`hydrogen`** model (Hydrogen-like / one-electron radial orbitals), whose nodal structure is analytic and correct.
+
 ## Top-level optimizer options
 
 ```json
