@@ -74,8 +74,17 @@ Composes the DFT reference data and the primitive basis settings of the ORBGEN i
 ### `lmaxmax` & per-geom DFT knobs
 - `lmaxmax` (non-negative int, or dev-string `=N`): max angular momentum of the basis — must be ≥ any orbital's l.
 - `nbands` (positive int): number of states included in the spillage.
-- `nspin`: spin polarization.
+- `nspin`: spin polarization. Setting it enables open-shell wavefunctions, but there is **no observed need for it** — keep `nspin: 1` (closed shell).
 - `celldm` (positive, default `1.0`): lattice constant scale.
+
+### Avoiding singular overlap per bond length
+The `rcut` × `lmax` combination can make the overlap matrix **singular for some bond lengths** (the DFT/SCF then stalls or fails to converge — see the `scalapack_gvx` fail-fast note in `orbgen-converge-rcutlmax`). Rule of thumb: **stop the calculation at that geometry and drop that bond length from `pertmags`.**
+
+This only works if `pertmags` is an explicit list of numbers. To recover the exact values being tested, either:
+- read the per-element defaults out of `DEFAULT_BOND_LENGTH` in `SIAB/abacus/io.py`, or
+- list the generated job directory (one subfolder per bond length) and see which ones actually ran / failed.
+
+Then resubmit with the offending bond length removed.
 
 When in doubt about bond lengths, just use `"pertmags": "auto"`.
 
