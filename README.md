@@ -195,9 +195,11 @@ Notes on the individual models:
 - `hydrogen` with `otherelem` set to another element of higher Z is useful to avoid the truncation of the generated hydrogen-like radial functions at the cutoff radius.
 - `pretrained` with `pretrained` pointing to an `.orb` file lets you continue from a previously generated orbital.
 
-### Automatic basis growth: `greedygrow` and `nzeta_max`
+### Basis growth over zeta counts: `greedygrow` and `nzeta_max` (experimental)
 
-Instead of manually writing one contraction entry per sought-after basis size, you can ask the code to **grow a basis set automatically** until the spillage stops decreasing. Set `"greedygrow": true` on an orbital and give an upper bound `nzeta_max`:
+> Note the division of labour: the convergence test workflow above (`tools/JYLmaxRcutJointConvTest*`) determines the *completeness* parameters **`rcut` and `lmax`**. This section is about a **different** knob — growing the number of **zeta** functions (`nzeta`) for a given `rcut`/`lmax`. In the common workflow you set `rcut`/`lmax` via the convergence test and specify an explicit `nzeta` per angular momentum; you do not need `greedygrow` at all.
+
+`greedygrow` lets an orbital **grow its own zeta counts** until the spillage stops decreasing. Set `"greedygrow": true` and give an upper bound `nzeta_max`:
 
 ```json
 {
@@ -214,7 +216,9 @@ Instead of manually writing one contraction entry per sought-after basis size, y
 }
 ```
 
-The greedy algorithm starts from the `nzeta` given, and at each step tries adding one more zeta function for each angular momentum, keeps the one that most reduces the spillage per `(2l+1)` basis functions (accounting for the computational cost), and repeats until no angular momentum can lower the spillage (or `nzeta_max` is reached). This is the recommended way to turn "generate a basis set" into an automated, convergence-driven process. Note that `nzeta_max` must be element-wise greater than or equal to `nzeta`.
+Starting from `nzeta`, the greedy algorithm tries adding one more zeta function to each angular momentum, keeps the one that most reduces the spillage per `(2l+1)` basis functions (accounting for the computational cost), and repeats until no angular momentum can lower the spillage (or `nzeta_max` is reached). `nzeta_max` must be element-wise greater than or equal to `nzeta`.
+
+**Caveat — not recommended for production.** This is a hidden/experimental option: it is not part of the validated input schema (it is only honored because unknown keys are passed through), and, being a greedy heuristic over repeated non-convex spillage optimizations, it is difficult to make reliable — the spillage surface can be uneven enough that the per-step greedy choice is noisy. Empirical experience favours **manually specifying an explicit `nzeta` per angular momentum** (the basis-contraction scheme in the preceding section) over automatic growth. Consider `greedygrow` experimental and for prototyping only.
 
 ### Other per-orbital options
 

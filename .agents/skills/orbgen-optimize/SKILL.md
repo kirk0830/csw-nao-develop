@@ -39,9 +39,11 @@ Each orbital's initial guess comes from a model. The top-level `spill_guess` set
 
 Supported models (see README for full notes): `ones`, `random` (needs `seed`), `atomic` (`jobdir` required; optional `vloc_aux`, `lloc_min`), `hydrogen` (`slater`, `otherelem`), `pretrained` (`pretrained` → an existing `.orb`). `model_kwargs` are filtered automatically to the keys valid for the chosen model.
 
-## Automatic growth: `greedygrow` + `nzeta_max`
+## Automatic growth over zeta: `greedygrow` + `nzeta_max` (experimental)
 
-For automation, set `greedygrow: true` and an upper bound `nzeta_max`; the code adds zeta functions greedily until spillage stops improving:
+**Division of labour:** the convergence test (`orbgen-converge`) fixes `rcut`/`lmax`. `greedygrow` acts only on `nzeta` (per-l zeta counts). Prefer specifying `nzeta` explicitly (the checkpoint cascade above); treat `greedygrow` as experimental.
+
+If explicitly requested, `greedygrow: true` adds zeta functions greedily until spillage stops improving:
 
 ```json
 {
@@ -53,6 +55,8 @@ For automation, set `greedygrow: true` and an upper bound `nzeta_max`; the code 
 ```
 
 `nzeta_max` must be element-wise ≥ `nzeta`.
+
+> **Caveat:** `greedygrow` is hidden/experimental — not part of the validated input schema, and reliability is limited because it repeatedly re-runs non-convex spillage optimizations and picks a single noisy greedily-best l. Do not offer it as the default automation path; use explicit `nzeta` (checkpoint cascade) as the default, unless the user explicitly asks for greedy growth.
 
 ## Other per-orbital options
 

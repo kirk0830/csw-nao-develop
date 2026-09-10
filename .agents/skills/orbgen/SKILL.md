@@ -30,11 +30,13 @@ If the user can't provide these, stop. Never fabricate them.
 Collect (ask if not given):
 1. **element** (e.g. `Si`).
 2. **pseudo_dir** — path to the matching pseudopotential (delegate to `orbgen-ppor` to confirm the match).
-3. **computational budget / target quality** — one of:
-   - `minimal` (e.g. 1s1p),
-   - `polarized` (e.g. 2s2p1d — recommended default),
-   - `automatic` (use `greedygrow` + `nzeta_max` so the basis grows to convergence).
-4. **rcut / lmax** — if the user has no preference, run `orbgen-converge`; otherwise accept their values or defaults.
+3. **computational budget / target quality** — one of the explicit contraction tiers:
+   - `minimal` (e.g. `nzeta: [1, 1, 0]` = 1s1p),
+   - `polarized` (e.g. `nzeta: [2, 2, 1]` = 2s2p1d — recommended default).
+   These tiers set an explicit `nzeta` per angular momentum; see `orbgen-optimize`.
+4. **rcut / lmax** — if the user has no preference, run `orbgen-converge` to determine them; otherwise accept their values or defaults.
+
+> Do **not** default to automatic nzeta growth (`greedygrow`). It is an experimental/hidden option and empirical experience finds it unreliable (repeated non-convex spillage optimizations, uneven spillage surface). Set `rcut`/`lmax` from the convergence test and specify `nzeta` explicitly.
 
 ## Run the orchestrator flow
 
@@ -54,9 +56,9 @@ Use these defaults unless the user asks for something else:
 | optimizer | `scipy.bfgs` | `optimizer`, `scipy.*` / `torch.*` keys |
 | max steps | `9000` | `max_steps` |
 | initialization | `atomic` | `spill_guess` / per-orbital `model` + `model_kwargs` |
-| growth | manual contractions | `greedygrow` + `nzeta_max` |
+| growth | explicit `nzeta` per l (checkpoint cascade) | `greedygrow` + `nzeta_max` (experimental, not recommended) |
 | primitive type | `reduced` | `primitive_type` |
 
-For "automatic" quality, build a single orbital with `greedygrow: true` and `nzeta_max` set to the user's upper bound; `orbgen-optimize` will run the greedy algorithm to convergence.
+Use explicit `nzeta` values via a checkpoint cascade (`orbgen-optimize`); `greedygrow` is a hidden/experimental option and should not be a default (see caveat above).
 
 Always confirm the generated JSON against the scheme in `README.md` (compulsory keys listed there) before running `orbgen`.
