@@ -33,6 +33,11 @@ These are hyperparameters to fix **ahead of** the orbital run (see `tools/README
 - `ecutjy`: total energy is a poor indicator of how many NSW functions are enough (occupied-state bias; tight dimers need far more). Test it with `tools/JYEkinConvTest*` (`Generator.py` → run → `Reader.py`, plotting `JYEkinConvTest.png`). A reference threshold is `ecutjy=60` for ~1 kcal/mol chemical accuracy.
 - `lmax`/`rcut`: benchmark against a PW reference via `tools/JYLmaxRcutJointConvTest*` (see `orbgen-converge`).
 
+**Ask the user** whether they want to test these or just pick values on the spot ("拍脑袋"). Quick-pick heuristics to offer:
+
+- Recommended quick rule: **`ecutwfc = ecutjy + 50 Ry`** (empirically derived from grid-integration convergence tests).
+- Historical (v2.0-era) default: `ecutjy == ecutwfc`, both taken blindly as **`100`**. Recorded as project lore — usable as a cheap starting point, not a recommendation to prefer over the tested values above.
+
 ## Reference geometries block
 
 ```json
