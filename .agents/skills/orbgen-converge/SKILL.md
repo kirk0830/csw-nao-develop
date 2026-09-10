@@ -11,7 +11,7 @@ description: "Run and post-process the rcut/lmax convergence test for ORBGEN pri
 
 **The primitive basis is deemed converged when its total energy lies within a target of the plane-wave reference.** The project convention (see `tools/README.md`) targets **~1 kcal/mol "chemical accuracy"** — the published CSW-NAO defaults satisfying this are `ecutjy=60`, `lmax=3`, `rcut=8`. Use the user's target if they have one; otherwise 1 kcal/mol is the default.
 
-Method background: this scheme generalizes the spillage-minimization approach of Chen et al., J. Phys. Condens. Matter 22, 445501 (2010) and Lin et al., Phys. Rev. B 103, 235131 (2021); the CSW implementation is described in the repo's paper, **arXiv:2603.13995** ("Systematically Improvable NAO Basis Using Contracted Truncated Spherical Waves").
+Method background: the contraction **minimizes the trace of the kinetic operator in the residual space**, generalizing the spillage-minimizing scheme [M. Chen et al., J. Phys. Condens. Matter 22, 445501 (2010); P. Lin et al., Phys. Rev. B 103, 235131 (2021)]. The CSW implementation is described in the repo's paper, **arXiv:2603.13995** ("Systematically Improvable NAO Basis Using Contracted Truncated Spherical Waves"); using contracted truncated spherical waves (instead of plane waves) as the expansion basis bridges reference states and NAOs more effectively and removes spurious periodic-image interactions, improving transferability.
 
 ## Steps
 
