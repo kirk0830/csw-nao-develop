@@ -9,7 +9,7 @@ Total-entry orchestrator of the ORBGEN skill series. It turns a short user reque
 
 ## Skill series map
 
-- [`orbgen-encyclopedia`](orbgen-encyclopedia/SKILL.md) — teaches basis-set concepts (SZ/DZ/TZ, polarization, the `nzeta` array). Read it when explaining or choosing `nzeta`.
+- [`general-encyclopedia-zeta`](general-encyclopedia-zeta/SKILL.md) — teaches basis-set concepts & notations (SZ/DZ/TZ, minimal basis, polarization, pVnZ vs nZmP, `nzeta`, valence layers). Read it when explaining or choosing `nzeta`.
 - [`orbgen-ppor`](orbgen-ppor/SKILL.md) — choose / validate the pseudopotential.
 - [`orbgen-converge`](orbgen-converge/SKILL.md) — pick `rcut`/`lmax` via a convergence test.
 - [`orbgen-primitive`](orbgen-primitive/SKILL.md) — reference geometries + primitive basis.
