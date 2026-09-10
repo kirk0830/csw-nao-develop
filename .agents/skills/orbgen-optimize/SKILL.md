@@ -20,7 +20,8 @@ Composes and runs the `orbitals` block, then executes `orbgen`. This is where th
 
 - First contraction has `checkpoint: null`. Later ones set `checkpoint` to the index of the smaller basis they build on.
 - `nzeta`: number of zeta per angular momentum.
-- `geoms`: indices into the `geoms` block; `nbands`: `occ`, `all`, or an int ≤ the geom's `nbands`.
+- `geoms`: **a list of int**, indices into the `geoms` block — each `geoms` entry (a single dict) is one reference structure/perturbation, and this int says which ones this orbital draws its reference DFT wavefunctions from. Pass `[0]` for one geometry or `[0, 1]` for several (not a bare int).
+- `nbands`: `occ`, `all`, or an int ≤ the geom's `nbands`.
 - The max l in any `nzeta` must be ≤ the geom's `lmaxmax`.
 
 ## Initialization: `model` / `model_kwargs`
