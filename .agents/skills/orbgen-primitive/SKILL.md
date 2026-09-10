@@ -22,18 +22,18 @@ Composes the DFT reference data and the primitive basis settings of the ORBGEN i
 - `fit_basis`: `jy` (contracted NSW, default) or `pw` (plane-wave reference, ~ PTG-DPSI/LRH). Ask the user if unsure; `jy` is the safe default.
 - `ecutwfc`: plane-wave / realspace-grid convergence needed by the *pseudopotential*; make it large enough that the pseudo (via ABACUS) is converged.
 - `ecutjy`: kinetic-energy cutoff of the underlying NSW/jy spherical-Bessel expansion (defaults to `ecutwfc` if omitted).
-- `bessel_nao_rcut`: list of int truncation radii, in Bohr. `orbgen` will loop the whole workflow for each rcut. `orbgen-converge` can pick it; otherwise take the user's value.
+- `bessel_nao_rcut`: list of int truncation radii, in Bohr. `orbgen` will loop the whole workflow for each rcut. Picked by `orbgen-converge-rcutlmax`; otherwise take the user's value.
 - `primitive_type`: keep `"reduced"` for general use.
 
-### Determine `ecutwfc`/`ecutjy` (and `lmax`/`rcut`) *before* generating
+### Sizing `ecutwfc` / `ecutjy` — test or pick
 
-These are hyperparameters to fix **ahead of** the orbital run (see `tools/README.md`). Story them as explicit, tested choices, not afterthoughts:
+`ecutwfc` and `ecutjy` are hyperparameters to fix **ahead of** the orbital run (see `tools/README.md`).
 
-- `ecutwfc`/grid: the pseudopotential's own convergence. Ask the user whether it has been tested; if not, run a PW/ecut convergence check.
-- `ecutjy`: total energy is a poor indicator of how many NSW functions are enough (occupied-state bias; tight dimers need far more). Test it with `tools/JYEkinConvTest*` (`Generator.py` → run → `Reader.py`, plotting `JYEkinConvTest.png`). A reference threshold is `ecutjy=60` for ~1 kcal/mol chemical accuracy.
-- `lmax`/`rcut`: benchmark against a PW reference via `tools/JYLmaxRcutJointConvTest*` (see `orbgen-converge`).
+- `ecutwfc`/grid: the *pseudopotential*'s own grid/plane-wave convergence. Ask the user whether it has been tested; if not, run a PW/ecut convergence check.
+- `ecutjy`: kinetic-energy cutoff of the NSW/jy expansion. Run the band-structure convergence test in **`orbgen-converge-ecutjy`** (η criterion, `tools/JYEkinConvTest*`); the project reference answer is `ecutjy=60` for ~1 kcal/mol chemical accuracy.
+- `lmax`/`rcut`: benchmark against a PW reference via **`orbgen-converge-rcutlmax`** (`tools/JYLmaxRcutJointConvTest*`).
 
-**Ask the user** whether they want to test these or just pick values on the spot ("拍脑袋"). Quick-pick heuristics to offer:
+**Ask the user** whether they want to run these tests or just pick values on the spot ("拍脑袋"). Quick-pick heuristics to offer:
 
 - Recommended quick rule: **`ecutwfc = ecutjy + 50 Ry`** (empirically derived from grid-integration convergence tests).
 - Historical (v2.0-era) default: `ecutjy == ecutwfc`, both taken blindly as **`100`**. Recorded as project lore — usable as a cheap starting point, not a recommendation to prefer over the tested values above.

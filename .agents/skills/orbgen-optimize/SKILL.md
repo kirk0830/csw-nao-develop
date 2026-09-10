@@ -41,7 +41,7 @@ Supported models (see README for full notes): `ones`, `random` (needs `seed`), `
 
 ## Automatic growth over zeta: `greedygrow` + `nzeta_max` (experimental)
 
-**Division of labour:** the convergence test (`orbgen-converge`) fixes `rcut`/`lmax`. `greedygrow` acts only on `nzeta` (per-l zeta counts). Prefer specifying `nzeta` explicitly (the checkpoint cascade above); treat `greedygrow` as experimental.
+**Division of labour:** the convergence test (`orbgen-converge-rcutlmax`) fixes `rcut`/`lmax`; `orbgen-converge-ecutjy` fixes `ecutjy`. `greedygrow` acts only on `nzeta` (per-l zeta counts). Prefer specifying `nzeta` explicitly (the checkpoint cascade above); treat `greedygrow` as experimental.
 
 If explicitly requested, `greedygrow: true` adds zeta functions greedily until spillage stops improving:
 

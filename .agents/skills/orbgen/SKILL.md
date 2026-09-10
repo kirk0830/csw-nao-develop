@@ -11,7 +11,8 @@ Total-entry orchestrator of the ORBGEN skill series. It turns a short user reque
 
 - [`general-encyclopedia-zeta`](general-encyclopedia-zeta/SKILL.md) — teaches basis-set concepts & notations (SZ/DZ/TZ, minimal basis, polarization, pVnZ vs nZmP, `nzeta`, valence layers). Read it when explaining or choosing `nzeta`.
 - [`orbgen-ppor`](orbgen-ppor/SKILL.md) — choose / validate the pseudopotential.
-- [`orbgen-converge`](orbgen-converge/SKILL.md) — pick `rcut`/`lmax` via a convergence test.
+- [`orbgen-converge-ecutjy`](orbgen-converge-ecutjy/SKILL.md) — pick the NSW spherical-wave cutoff `ecutjy` via the band-structure η test.
+- [`orbgen-converge-rcutlmax`](orbgen-converge-rcutlmax/SKILL.md) — pick `rcut`/`lmax` via the joint vs-plane-wave convergence test.
 - [`orbgen-primitive`](orbgen-primitive/SKILL.md) — reference geometries + primitive basis.
 - [`orbgen-optimize`](orbgen-optimize/SKILL.md) — spillage optimization & contraction.
 - [`orbgen-validate`](orbgen-validate/SKILL.md) — check & plot outputs, optional `projgen`.
@@ -37,7 +38,7 @@ Collect (ask if not given):
    These tiers set an explicit `nzeta` per angular momentum; see `orbgen-optimize`.
 
 > The `minimal` tier is NOT guessed: derive it by reading the pseudopotential's valence shells (the agent parses the pseudo; see `general-encyclopedia-zeta`) and confirm it with the user.
-4. **rcut / lmax** — if the user has no preference, run `orbgen-converge` to determine them; otherwise accept their values or defaults.
+4. **ecutjy / rcut / lmax** — if the user has no preference, run `orbgen-converge-ecutjy` and `orbgen-converge-rcutlmax` to determine them; otherwise accept their values or defaults.
 
 > Do **not** default to automatic nzeta growth (`greedygrow`). It is an experimental/hidden option and empirical experience finds it unreliable (repeated non-convex spillage optimizations, uneven spillage surface). Set `rcut`/`lmax` from the convergence test and specify `nzeta` explicitly.
 
@@ -45,7 +46,7 @@ Collect (ask if not given):
 
 1. Confirm ABACUS runtime (mandatory, above).
 2. `orbgen-ppor` — resolve and validate `pseudo_dir`.
-3. `orbgen-converge` — if requested or if rcut/lmax are unknown, determine them.
+3. `orbgen-converge-ecutjy`, `orbgen-converge-rcutlmax` — if requested or if the cutoffs / rcut/lmax are unknown, determine them.
 4. `orbgen-primitive` — build the `geoms` + primitive basis part of the input.
 5. `orbgen-optimize` — build the `orbitals` block (default contraction scheme + optional advanced options) and run `orbgen`.
 6. `orbgen-validate` — verify the emitted `.orb` file, plot it, and (optionally) generate a projector with `projgen`.
