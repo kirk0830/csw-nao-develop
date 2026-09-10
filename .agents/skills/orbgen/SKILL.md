@@ -13,7 +13,8 @@ Total-entry orchestrator of the ORBGEN skill series. It turns a short user reque
 - [`orbgen-ppor`](orbgen-ppor/SKILL.md) — choose / validate the pseudopotential.
 - [`orbgen-converge-ecutjy`](orbgen-converge-ecutjy/SKILL.md) — pick the NSW spherical-wave cutoff `ecutjy` via the band-structure η test.
 - [`orbgen-converge-rcutlmax`](orbgen-converge-rcutlmax/SKILL.md) — pick `rcut`/`lmax` via the joint vs-plane-wave convergence test.
-- [`orbgen-primitive`](orbgen-primitive/SKILL.md) — reference geometries + primitive basis.
+- [`orbgen-reference-geometry`](orbgen-reference-geometry/SKILL.md) — build the `geoms` block (`proto`/`pertkind`/`pertmags`/`lmaxmax`, `auto` bond lengths, singular-overlap handling).
+- [`orbgen-primitive`](orbgen-primitive/SKILL.md) — primitive basis (fit_basis, ecutwfc/ecutjy, bessel_nao_rcut, primitive_type).
 - [`orbgen-optimize`](orbgen-optimize/SKILL.md) — spillage optimization & contraction.
 - [`orbgen-validate`](orbgen-validate/SKILL.md) — check & plot outputs, optional `projgen`.
 
@@ -47,9 +48,10 @@ Collect (ask if not given):
 1. Confirm ABACUS runtime (mandatory, above).
 2. `orbgen-ppor` — resolve and validate `pseudo_dir`.
 3. `orbgen-converge-ecutjy`, `orbgen-converge-rcutlmax` — if requested or if the cutoffs / rcut/lmax are unknown, determine them.
-4. `orbgen-primitive` — build the `geoms` + primitive basis part of the input.
-5. `orbgen-optimize` — build the `orbitals` block (default contraction scheme + optional advanced options) and run `orbgen`.
-6. `orbgen-validate` — verify the emitted `.orb` file, plot it, and (optionally) generate a projector with `projgen`.
+4. `orbgen-reference-geometry` — build the `geoms` block (reference structures, bond lengths).
+5. `orbgen-primitive` — build the primitive basis part of the input (`fit_basis`, `ecutwfc`/`ecutjy`, `bessel_nao_rcut`).
+6. `orbgen-optimize` — build the `orbitals` block (default contraction scheme + optional advanced options) and run `orbgen`.
+7. `orbgen-validate` — verify the emitted `.orb` file, plot it, and (optionally) generate a projector with `projgen`.
 
 ## Defaults vs. advanced override
 

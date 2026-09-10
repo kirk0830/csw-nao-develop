@@ -1,11 +1,11 @@
 ---
 name: "orbgen-primitive"
-description: "Build the reference-geometry and primitive-basis part of an ORBGEN input JSON (fit_basis, ecut, bessel_nao_rcut, primitive_type, geoms). Invoke when composing or templating an ORBGEN input that needs reference structures."
+description: "Build the primitive-basis part of an ORBGEN input JSON (fit_basis, ecut, bessel_nao_rcut, primitive_type). Invoke when composing or templating an ORBGEN input that needs primitive basis settings. Reference geometries are handled by orbgen-reference-geometry."
 ---
 
-# orbgen-primitive — reference geometries + primitive basis
+# orbgen-primitive — primitive basis
 
-Composes the DFT reference data and the primitive basis settings of the ORBGEN input.
+Composes the primitive-basis settings of the ORBGEN input (the DFT reference structure geometries live in `orbgen-reference-geometry`).
 
 ## Primitive basis block
 
@@ -30,7 +30,7 @@ Composes the DFT reference data and the primitive basis settings of the ORBGEN i
 `ecutwfc` and `ecutjy` are hyperparameters to fix **ahead of** the orbital run (see `tools/README.md`).
 
 - `ecutwfc`/grid: the *pseudopotential*'s own grid/plane-wave convergence. Ask the user whether it has been tested; if not, run a PW/ecut convergence check.
-- `ecutjy`: kinetic-energy cutoff of the NSW/jy expansion. Run the band-structure convergence test in **`orbgen-converge-ecutjy`** (η criterion, `tools/JYEkinConvTest*`); the project reference answer is `ecutjy=60` for ~1 kcal/mol chemical accuracy.
+- `ecutjy`: kinetic-energy cutoff of the NSW/jy expansion. Run the band-structure convergence test in **`orbgen-converge-ecutjy`** (eta criterion, `tools/JYEkinConvTest*`); the project reference answer is `ecutjy=60` for ~1 kcal/mol chemical accuracy.
 - `lmax`/`rcut`: benchmark against a PW reference via **`orbgen-converge-rcutlmax`** (`tools/JYLmaxRcutJointConvTest*`).
 
 **Ask the user** whether they want to run these tests or just pick values on the spot ("拍脑袋"). Quick-pick heuristics to offer:
@@ -38,56 +38,11 @@ Composes the DFT reference data and the primitive basis settings of the ORBGEN i
 - Recommended quick rule: **`ecutwfc = ecutjy + 50 Ry`** (empirically derived from grid-integration convergence tests).
 - Historical (v2.0-era) default: `ecutjy == ecutwfc`, both taken blindly as **`100`**. Recorded as project lore — usable as a cheap starting point, not a recommendation to prefer over the tested values above.
 
-## Reference geometries block
+## Reference geometries
 
-```json
-{
-  "geoms": [
-    {
-      "proto": "dimer",
-      "pertkind": "stretch",
-      "pertmags": [1.62, 1.82, 2.22, 2.72, 3.22],
-      "nbands": 20,
-      "nspin": 1,
-      "lmaxmax": 2
-    }
-  ]
-}
-```
-
-### `proto` — pick `dimer`
-`dimer`, `trimer`, `square`, `tetrahedron`, `octahedron`, `cube`, or a structure file path (any custom file whose path is passed). Validated in `SIAB/io/param.py#GeomAssert`.
-
-> **Recommendation: use only `dimer`.** More/bigger protos are meant to improve transferability, but with too few reference samples the added structures produce outliers that pollute the fitted orbital quality. `dimer` is the safe, supported default. (`DEFAULT_BOND_LENGTH` in `SIAB/abacus/io.py` only covers `dimer`/`trimer` anyway.)
-
-### `pertkind` — stretch only
-`pertkind` is the **perturbation type**. Only `stretch` is implemented; `shear`/`twist` are reserved but raise `NotImplementedError` (`SIAB/io/param.py`, `SIAB/abacus/api.py#_build_pert`). Defaults to `stretch` if omitted — you can rely on it.
-
-### `pertmags` — bond lengths, manual list or `auto`
-`pertmags` is the **perturbation magnitude**. For a `dimer` (stretch) that literally means the **bond length(s)**.
-- A **list of int/float**: bond lengths in Bohr (e.g. `[1.75, 2.0, 2.25, 2.75, 3.75]`).
-- **`"auto"`**: expand to a sensible bond-length series. Resolution order (`SIAB/abacus/run.py#_build_abacus`):
-  1. look up the element in `DEFAULT_BOND_LENGTH[proto]` (`SIAB/abacus/io.py`);
-  2. if absent, fall back to a **bond-length scan** (Morse fit plus a 1.5 meV/Å energy filter, `SIAB/abacus/blscan.py`).
-  Bonus: the lookup table already ships curated per-element bond lengths for most elements — prefer `auto` when unsure of the bond length.
-
-### `lmaxmax` & per-geom DFT knobs
-- `lmaxmax` (non-negative int, or dev-string `=N`): max angular momentum of the basis — must be ≥ any orbital's l.
-- `nbands` (positive int): number of states included in the spillage.
-- `nspin`: spin polarization. Setting it enables open-shell wavefunctions, but there is **no observed need for it** — keep `nspin: 1` (closed shell).
-- `celldm` (positive, default `1.0`): lattice constant scale.
-
-### Avoiding singular overlap per bond length
-The `rcut` × `lmax` combination can make the overlap matrix **singular for some bond lengths** (the DFT/SCF then stalls or fails to converge — see the `scalapack_gvx` fail-fast note in `orbgen-converge-rcutlmax`). Rule of thumb: **stop the calculation at that geometry and drop that bond length from `pertmags`.**
-
-This only works if `pertmags` is an explicit list of numbers. To recover the exact values being tested, either:
-- read the per-element defaults out of `DEFAULT_BOND_LENGTH` in `SIAB/abacus/io.py`, or
-- list the generated job directory (one subfolder per bond length) and see which ones actually ran / failed.
-
-Then resubmit with the offending bond length removed.
-
-When in doubt about bond lengths, just use `"pertmags": "auto"`.
+The `geoms` block (which reference structures, bond lengths, `nspin`, `lmaxmax`, etc.) is **handled by `orbgen-reference-geometry`**, not here. See:
+- [`orbgen-reference-geometry`](orbgen-reference-geometry/SKILL.md) — `proto`/`pertkind`/`pertmags`/`lmaxmax`/`nbands`/`nspin`, including the bond-length `auto` defaults and the singular-overlap-per-bond-length failure mode.
 
 ## Output
 
-Return the merged primitive + `geoms` JSON fragment to the orchestrator so it can append the `orbitals` block before running `orbgen`.
+Return the primitive-basis JSON fragment to the orchestrator so it can be merged with the `geoms` (see `orbgen-reference-geometry`) and the `orbitals` block (see `orbgen-optimize`) before running `orbgen`.
