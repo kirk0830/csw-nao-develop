@@ -86,7 +86,7 @@ If explicitly requested, `greedygrow: true` adds zeta functions greedily until s
 
 ### Using `fix_components` to preserve nodal structure (experience)
 
-A radial orbital with angular momentum `l` (p, d, f, …) should have **`l` nodes** — the number of times the orbital crosses the axis (p → 1 node, d → 2 nodes, f → 3, …). This is a strong sanity check on the optimized result.
+Within a given angular momentum channel, the **`i`-th orbital (1-indexed) should have `i-1` nodes** — the number of times the orbital crosses the axis. So the first is nodeless, the second has 1 node, the third has 2 nodes, and so on — **regardless of `l`** (this holds for s, p, d, f, … alike). This is a strong sanity check on the optimized result.
 
 Occasionally the *in-built* initializer (model) yields the **correct node count**, but the optimization afterwards **destroys it**. A common cause is **too few bands** in the `orbitals`/`nbands` settings: with insufficient bands there is not enough distinct information for the orbital to capture, so the optimizer latches onto noise and the node structure is lost.
 
