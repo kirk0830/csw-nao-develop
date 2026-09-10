@@ -44,7 +44,15 @@ Careful: the *valence* configuration in the pseudo is usually a subset of the fu
 
 ## Polarization functions
 
-A **polarization function** adds a higher-`l` channel that is empty in the ground state (e.g. a d on a 1s1p basis). It lets the atomic orbitals respond to an asymmetric environment (bonds, crystal field). Smoke-test names: SZP / SZ(d…) = single zeta + polarization d (`[1,1,1]`); DZP = double zeta + polarization (`[2,2,1]`).
+A **polarization function** adds a higher-`l` channel that is empty in the ground state (e.g. a d on a 1s1p basis). It lets the atomic orbitals respond to an asymmetric environment (bonds, crystal field). Smoke-test names: SZP / SZ(d…) = single zeta + polarization d (`[1,1,1]`); DZP = double zeta + polarization.
+
+### Going SZ → DZP: multiply zeta by 2, don't add 1
+
+DZ means **two** zeta per angular momentum, so each number in the minimal basis is **doubled**, then one polarization function is appended at the next higher l. Do **not** add 1 to each channel. Examples:
+
+- minimal `2s1p` → DZP = **4s2p1d** (`[4,2,1]`): 2s→4s, 1p→2p, + 1 d.
+- minimal `2s2p1d` → DZP = **4s4p2d1f** (`[4,4,2,1]`): 2s→4s, 2p→4p, 1d→2d, + 1 f.
+- minimal `1s1p` (Si) → DZP = **2s2p1d** (`[2,2,1]`), as in the pVDZ row below.
 
 ## Two notation families: pVnZ (Dunning) vs nZmP (def2-like)
 
