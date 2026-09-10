@@ -13,6 +13,18 @@ description: "Run and post-process the rcut/lmax convergence test for ORBGEN pri
 
 Method background: the contraction **minimizes the trace of the kinetic operator in the residual space**, generalizing the spillage-minimizing scheme [M. Chen et al., J. Phys. Condens. Matter 22, 445501 (2010); P. Lin et al., Phys. Rev. B 103, 235131 (2021)]. The CSW implementation is described in the repo's paper, **arXiv:2603.13995** ("Systematically Improvable NAO Basis Using Contracted Truncated Spherical Waves"); using contracted truncated spherical waves (instead of plane waves) as the expansion basis bridges reference states and NAOs more effectively and removes spurious periodic-image interactions, improving transferability.
 
+## Risks of over-large `rcut` / `lmax`
+
+Bigger is *generally* more complete, but there are real failure modes an agent must watch for:
+
+- **Near-singular overlap matrix.** Very diffuse functions from large `rcut`, or too many/high-`l` functions, can produce an overlap matrix that is (nearly) singular.
+- **`ks_solver: genelpa` (default) silently hangs.** With a singular overlap, the SCF appears to *freeze — no output, no error*. If a run shows no progress/output, suspect this before anything else.
+  - **Detection:** check the solver output for stalls; if `genelpa` is set and output stops, treat as a possible singular-overlap hang.
+  - **Warning the user:** when `rcut`/`lmax` are pushed large, proactively warn that a singular overlap could hang SCF.
+- **Fail-fast mitigation:** switch to **`ks_solver: scalapack_gvx`**. It does not *fix* the singularity, but it **fails fast** — ABACUS errors out immediately instead of hanging, making the failure obvious and debuggable. In agent-mode runs this converts a silent freeze into a clear diagnostic.
+
+Practical stance: prefer fail-fast (`scalapack_gvx`) during exploration/agent runs; keep `genelpa` for clean production systems after `rcut`/`lmax` are settled.
+
 ## Steps
 
 1. **Generate the sweep** with the generator workflow:
