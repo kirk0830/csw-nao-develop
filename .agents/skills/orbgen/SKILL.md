@@ -10,6 +10,7 @@ Total-entry orchestrator of the ORBGEN skill series. It turns a short user reque
 ## Skill series map
 
 - [`general-encyclopedia-zeta`](general-encyclopedia-zeta/SKILL.md) — teaches basis-set concepts & notations (SZ/DZ/TZ, minimal basis, polarization, pVnZ vs nZmP, `nzeta`, valence layers). Read it when explaining or choosing `nzeta`.
+- [`general-theoretical-background`](general-theoretical-background/SKILL.md) — the theory (arXiv:2603.13995): TSW/NSW parametrization, generalized spillage, reference systems, basis hierarchy, systematic convergence to CBS. Read it to answer "why" questions about the input knobs.
 - [`orbgen-ppor`](orbgen-ppor/SKILL.md) — choose / validate the pseudopotential.
 - [`orbgen-converge-ecutjy`](orbgen-converge-ecutjy/SKILL.md) — pick the NSW spherical-wave cutoff `ecutjy` via the band-structure η test.
 - [`orbgen-converge-rcutlmax`](orbgen-converge-rcutlmax/SKILL.md) — pick `rcut`/`lmax` via the joint vs-plane-wave convergence test.

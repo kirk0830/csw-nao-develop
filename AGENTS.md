@@ -46,14 +46,15 @@ This repository ships a skill series under `.agents/skills/`. **When a task matc
 Series map (each `a-b-c` is the folder name; read its `SKILL.md`):
 
 1. [`general-encyclopedia-zeta`](.agents/skills/general-encyclopedia-zeta/SKILL.md) — basis-set concepts & notation (SZ/DZ/TZ, minimal basis, polarization, pVnZ vs nZmP, `nzeta`, valence shells). Use when choosing/explaining `nzeta` or reading a pseudopotential's valence layers.
-2. [`orbgen-ppor`](.agents/skills/orbgen-ppor/SKILL.md) — choose / validate the pseudopotential (element + XC match, file existence, derive the `potential_orb` batch key).
-3. [`orbgen-converge-ecutjy`](.agents/skills/orbgen-converge-ecutjy/SKILL.md) — pick the NSW spherical-wave cutoff `ecutjy` via the band-structure η test (`tools/JYEkinConvTest*`).
-4. [`orbgen-converge-rcutlmax`](.agents/skills/orbgen-converge-rcutlmax/SKILL.md) — pick `rcut`/`lmax` via the joint vs-plane-wave convergence test (`tools/JYLmaxRcutJointConvTest*`).
-5. [`orbgen-reference-geometry`](.agents/skills/orbgen-reference-geometry/SKILL.md) — the `geoms` section: `proto`, `pertkind`, `pertmags` (incl. `auto`), `lmaxmax`, `nbands`, `nspin`, and per-bond-length singular overlap handling.
-6. [`orbgen-primitive`](.agents/skills/orbgen-primitive/SKILL.md) — the primitive-basis part of the input (`fit_basis`, `ecutwfc`/`ecutjy`, `bessel_nao_rcut`, `primitive_type`).
-7. [`orbgen-optimize`](.agents/skills/orbgen-optimize/SKILL.md) — the `orbitals` block: contraction tiers, `checkpoint` cascade, `model`/`model_kwargs` (incl. `atomic` + `vloc_aux`), `spill_guess`, `optimizer`, `fix_components`, node-count sanity checks.
-8. [`orbgen`](.agents/skills/orbgen/SKILL.md) — the total-entry orchestrator that turns a short user request into a runnable input. Start here for end-to-end generation, and delegate each stage to the sub-skill above.
-9. [`orbgen-validate`](.agents/skills/orbgen-validate/SKILL.md) — verify/plot the emitted `.orb`, optionally run `projgen`.
+2. [`general-theoretical-background`](.agents/skills/general-theoretical-background/SKILL.md) — the theory (arXiv:2603.13995): TSW/NSW parametrization, generalized spillage, reference systems, basis hierarchy, systematic convergence to CBS. Use to answer "why" questions about the input knobs.
+3. [`orbgen-ppor`](.agents/skills/orbgen-ppor/SKILL.md) — choose / validate the pseudopotential (element + XC match, file existence, derive the `potential_orb` batch key).
+4. [`orbgen-converge-ecutjy`](.agents/skills/orbgen-converge-ecutjy/SKILL.md) — pick the NSW spherical-wave cutoff `ecutjy` via the band-structure η test (`tools/JYEkinConvTest*`).
+5. [`orbgen-converge-rcutlmax`](.agents/skills/orbgen-converge-rcutlmax/SKILL.md) — pick `rcut`/`lmax` via the joint vs-plane-wave convergence test (`tools/JYLmaxRcutJointConvTest*`).
+6. [`orbgen-reference-geometry`](.agents/skills/orbgen-reference-geometry/SKILL.md) — the `geoms` section: `proto`, `pertkind`, `pertmags` (incl. `auto`), `lmaxmax`, `nbands`, `nspin`, and per-bond-length singular overlap handling.
+7. [`orbgen-primitive`](.agents/skills/orbgen-primitive/SKILL.md) — the primitive-basis part of the input (`fit_basis`, `ecutwfc`/`ecutjy`, `bessel_nao_rcut`, `primitive_type`).
+8. [`orbgen-optimize`](.agents/skills/orbgen-optimize/SKILL.md) — the `orbitals` block: contraction tiers, `checkpoint` cascade, `model`/`model_kwargs` (incl. `atomic` + `vloc_aux`), `spill_guess`, `optimizer`, `fix_components`, node-count sanity checks.
+9. [`orbgen`](.agents/skills/orbgen/SKILL.md) — the total-entry orchestrator that turns a short user request into a runnable input. Start here for end-to-end generation, and delegate each stage to the sub-skill above.
+10. [`orbgen-validate`](.agents/skills/orbgen-validate/SKILL.md) — verify/plot the emitted `.orb`, optionally run `projgen`.
 
 Use the orchestrator flow (delegate to the sub-skills in order) for any end-to-end generation task. Do not reinvent the steps that the skills already encode.
 
