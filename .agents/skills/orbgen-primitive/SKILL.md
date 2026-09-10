@@ -20,10 +20,18 @@ Composes the DFT reference data and the primitive basis settings of the ORBGEN i
 ```
 
 - `fit_basis`: `jy` (contracted NSW, default) or `pw` (plane-wave reference, ~ PTG-DPSI/LRH). Ask the user if unsure; `jy` is the safe default.
-- `ecutwfc`: grid-integration precision of the reference DFT; higher = more accurate but costlier.
-- `ecutjy`: kinetic-energy cutoff of the underlying NSW/jy (defaults to `ecutwfc` if omitted).
+- `ecutwfc`: plane-wave / realspace-grid convergence needed by the *pseudopotential*; make it large enough that the pseudo (via ABACUS) is converged.
+- `ecutjy`: kinetic-energy cutoff of the underlying NSW/jy spherical-Bessel expansion (defaults to `ecutwfc` if omitted).
 - `bessel_nao_rcut`: list of int truncation radii, in Bohr. `orbgen` will loop the whole workflow for each rcut. `orbgen-converge` can pick it; otherwise take the user's value.
 - `primitive_type`: keep `"reduced"` for general use.
+
+### Determine `ecutwfc`/`ecutjy` (and `lmax`/`rcut`) *before* generating
+
+These are hyperparameters to fix **ahead of** the orbital run (see `tools/README.md`). Story them as explicit, tested choices, not afterthoughts:
+
+- `ecutwfc`/grid: the pseudopotential's own convergence. Ask the user whether it has been tested; if not, run a PW/ecut convergence check.
+- `ecutjy`: total energy is a poor indicator of how many NSW functions are enough (occupied-state bias; tight dimers need far more). Test it with `tools/JYEkinConvTest*` (`Generator.py` → run → `Reader.py`, plotting `JYEkinConvTest.png`). A reference threshold is `ecutjy=60` for ~1 kcal/mol chemical accuracy.
+- `lmax`/`rcut`: benchmark against a PW reference via `tools/JYLmaxRcutJointConvTest*` (see `orbgen-converge`).
 
 ## Reference geometries block
 

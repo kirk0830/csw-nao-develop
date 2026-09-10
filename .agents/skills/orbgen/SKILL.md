@@ -35,6 +35,8 @@ Collect (ask if not given):
    - `minimal` (e.g. `nzeta: [1, 1, 0]` = 1s1p),
    - `polarized` (e.g. `nzeta: [2, 2, 1]` = 2s2p1d — recommended default).
    These tiers set an explicit `nzeta` per angular momentum; see `orbgen-optimize`.
+
+> The `minimal` tier is NOT guessed: derive it by reading the pseudopotential's valence shells (the agent parses the pseudo; see `general-encyclopedia-zeta`) and confirm it with the user.
 4. **rcut / lmax** — if the user has no preference, run `orbgen-converge` to determine them; otherwise accept their values or defaults.
 
 > Do **not** default to automatic nzeta growth (`greedygrow`). It is an experimental/hidden option and empirical experience finds it unreliable (repeated non-convex spillage optimizations, uneven spillage surface). Set `rcut`/`lmax` from the convergence test and specify `nzeta` explicitly.

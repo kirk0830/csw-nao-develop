@@ -38,6 +38,8 @@ nzeta = [1, 1, 0]     # 1s + 1p, and 0 d orbitals
 
 This is the minimal basis for Si. General rule per l: **number of occupied valence shells of that l ⇨ SZ nzeta for that l.**
 
+> **Reading is the agent's job.** In a hosted workflow the agent parses the pseudopotential to derive this SZ `nzeta` for the user; the user is not expected to read the pseudopotential file themselves. Confirm the derived value with the user, then use it as the `minimal` tier.
+
 Careful: the *valence* configuration in the pseudo is usually a subset of the full atomic configuration (e.g. Si is `[Ne] 3s² 3p²`); only the pseudo's valence shells count. The repository stores full ground-state configurations in `SIAB/data/build.py` (`AtomSpecies.ground_state_atomic_electronic_configuration`) and derives valence shells from the pseudo's `zval` — useful cross-checks when a pseudo is ambiguous.
 
 ## Polarization functions
