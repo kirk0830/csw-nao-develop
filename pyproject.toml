@@ -29,3 +29,31 @@ write_to = "SIAB/_version.py"
 [project.scripts]
 orbgen = "SIAB.orbgen:main"
 projgen = "SIAB.projgen:main"
+
+[tool.pixi.project]
+name = "SIAB"
+channels = ["conda-forge"]
+platforms = ["linux-64"]
+
+[tool.pixi.pypi-dependencies]
+SIAB = { path = ".", editable = true }
+numpy = "*"
+matplotlib = "*"
+scipy = "<1.10"
+torch = "*"
+torch_optimizer = "*"
+torch_complex = "*"
+addict = "*"
+
+[tool.pixi.feature.with-abacus-builtin.dependencies]
+abacus = "*"
+mpich = "*"
+libblas = { version = "*", build = "*mkl*" }
+
+[tool.pixi.environments]
+default = { solve-group = "default" }
+with-abacus-builtin = { features = ["with-abacus-builtin"], solve-group = "default" }
+
+[tool.pixi.tasks]
+orbgen = "orbgen"
+projgen = "projgen"

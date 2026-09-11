@@ -4,7 +4,9 @@ This repository contains the code for generating systematically improvable numer
 
 ## Installation
 
-The installation of the code is straightforward. You can create a conda environment and install the required dependencies using the following commands:
+You can install this package using either **conda + pip** or **pixi**. Choose one of the two options below; they are mutually exclusive.
+
+### Option 1: conda + pip
 
 ```bash
 conda create -n orbgen python=3.10
@@ -14,7 +16,24 @@ cd ABACUS-CSW-NAO
 pip install .
 ```
 
-the lines above will create a new conda environment named `orbgen`, activate it, clone the repository, navigate into the cloned directory, and install the package using pip.
+The commands above create a new conda environment named `orbgen`, activate it, clone the repository, navigate into the cloned directory, and install the package using pip.
+
+### Option 2: pixi
+
+[pixi](https://pixi.sh) is a lightweight, modern environment manager. It handles more than Python packages and avoids the commercial-use restrictions associated with the conda default channel.
+
+```bash
+git clone https://github.com/MCresearch/ABACUS-CSW-NAO.git
+cd ABACUS-CSW-NAO
+
+# default environment (SIAB only)
+pixi install
+pixi run orbgen -i input.json
+
+# environment with ABACUS built in via conda-forge
+pixi install -e with-abacus-builtin
+pixi run -e with-abacus-builtin orbgen -i input.json
+```
 
 ## Usage
 
@@ -259,3 +278,40 @@ The following top-level keys control how the underlying ABACUS DFT calculations 
 The truncation radius and the maximal angular momentum are two important parameters that control the completeness of the basis set. We suggest a systematic way to determine these two parameters by varying them and checking the convergence behavior of the relative total energy error of a test system calculated with the primitive basis set with respect to the reference plane wave calculation. 
 
 Please see the workflow `tools/JYLmaxRcutJointConvTestGenerator.py` for the details of how to perform this test. The workflow will generate a series of input scripts for the primitive basis set generation with different truncation radii and maximal angular momenta, and then you can run these input scripts to get the convergence behavior of the relative total energy error. A postprocessing script is also provided to plot the convergence behavior, which is `tools/JYLmaxRcutJointConvTestReader.py`. By analyzing the convergence behavior, you can determine the truncation radius and the maximal angular momentum that can achieve a good balance between accuracy and computational cost for your system of interest.
+
+## Advanced usage
+
+### Per-orbital initialization model
+
+Each dictionary in the `orbitals` list accepts an optional `model` keyword that controls how the contraction coefficients are initialized before spillage optimization. The default model is `"atomic"`. Supported values are:
+
+- `"atomic"` (default): use the single-atom ABACUS calculation as the initial guess. Requires `model_kwargs.jobdir` pointing to the monomer calculation folder.
+- `"random"`: initialize with random coefficients. Optionally set `model_kwargs.random_seed` for reproducibility.
+- `"ones"`: initialize with an identity-like coefficient matrix. No extra kwargs needed.
+- `"hydrogen"`: initialize with hydrogen-like orbitals. Use `model_kwargs.slater` (bool) to enable Slater screening and `model_kwargs.otherelem` (str) to generate orbitals for a different element.
+- `"pretrained"`: restart from an existing `.orb` file. Requires `model_kwargs.pretrained` with the path to the file.
+
+Example:
+
+```json
+{
+    "orbitals": [
+        {
+            "nzeta": [1, 1, 0],
+            "geoms": [0],
+            "nbands": "occ",
+            "checkpoint": null,
+            "model": "atomic",
+            "model_kwargs": {
+                "jobdir": "path/to/monomer"
+            }
+        }
+    ]
+}
+```
+
+### Other per-orbital keywords
+
+- `fix_components`: a nested list that freezes selected zeta functions during optimization. For example, `[[], [], [], [], [0]]` freezes the first zeta of the g-channel.
+- `filename`: custom output filename for the generated orbital.
+- `greedygrow` and `nzeta_max`: enable the greedy angular-momentum expansion algorithm. Set `"greedygrow": true` and provide `nzeta_max` to let the code automatically add the angular momentum that most reduces the spillage.
