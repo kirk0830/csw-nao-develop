@@ -46,7 +46,7 @@ torch_complex = "*"
 addict = "*"
 
 [tool.pixi.feature.with-abacus-builtin.dependencies]
-abacus = "3.8.4"
+abacus = { version = "3.8.4", build = "cpu_mpi_mpich*" }
 mpich = "*"
 libblas = { version = "*", build = "*mkl*" }
 
